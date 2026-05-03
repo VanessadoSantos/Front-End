@@ -3,10 +3,16 @@
 
 import { useState } from 'react';
 import { MOCK_PRODUCTS, CATEGORIES } from '@/data/products';
+import { useCart } from '@/hooks/useCart';
+import { CartSidebar } from '@/components/CartSidebar';
 
 export default function Home() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Zustand Actions
+  const { addItem, getTotalItems } = useCart();
 
   // Filtragem dos produtos por Busca e Categoria
   const filteredProducts = MOCK_PRODUCTS.filter((product) => {
@@ -18,11 +24,26 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 pb-12">
       {/* Topo / Banner */}
-      <header className="bg-gradient-to-r from-pink-600 to-purple-800 text-white py-12 px-4 text-center shadow-md">
-        <h1 className="text-4xl font-extrabold mb-2">Menina Sapeka Sexshop</h1>
-        <p className="text-pink-100 max-w-md mx-auto text-sm font-medium">
-          O e-commerce mais discreto e completo. Compre no varejo ou economize no atacado!
-        </p>
+      <header className="bg-gradient-to-r from-pink-600 to-purple-800 text-white py-8 px-6 shadow-md">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl font-extrabold mb-1">Menina Sapeka Sexshop</h1>
+            <p className="text-pink-100 max-w-md text-xs font-medium">
+              O e-commerce mais discreto e completo. Compre no varejo ou economize no atacado!
+            </p>
+          </div>
+
+          {/* Botão flutuante do Carrinho */}
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="bg-white text-slate-800 font-bold px-5 py-3 rounded-xl hover:bg-pink-50 active:scale-95 transition-all flex items-center gap-2 shadow-lg"
+          >
+            <span>🛒 Ver Carrinho</span>
+            <span className="bg-pink-600 text-white text-xs px-2.5 py-0.5 rounded-full">
+              {getTotalItems()}
+            </span>
+          </button>
+        </div>
       </header>
 
       {/* Grid principal (Filtros + Produtos) */}
@@ -87,7 +108,7 @@ export default function Home() {
                   <h3 className="text-base font-bold text-slate-800 mt-1 mb-1 line-clamp-1">
                     {product.name}
                   </h3>
-                  <p className="text-slate-500 text-xs line-clamp-2 mb-4">
+                  <p className="text-slate-500 text-xs line-clamp-2 mb-4 h-8">
                     {product.description}
                   </p>
 
@@ -111,7 +132,13 @@ export default function Home() {
                   </div>
 
                   {/* Botão de Compra */}
-                  <button className="w-full mt-4 bg-slate-900 hover:bg-pink-600 text-white font-bold py-2.5 rounded-xl transition-colors text-sm">
+                  <button 
+                    onClick={() => {
+                      addItem(product);
+                      setIsCartOpen(true); // Abre o carrinho automaticamente para feedback visual rápido
+                    }}
+                    className="w-full mt-4 bg-slate-900 hover:bg-pink-600 text-white font-bold py-2.5 rounded-xl transition-colors text-sm"
+                  >
                     Adicionar ao Carrinho
                   </button>
                 </div>
@@ -121,6 +148,9 @@ export default function Home() {
         </div>
 
       </section>
+
+      {/* Componente da Barra Lateral do Carrinho */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </main>
   );
 }
